@@ -1,67 +1,137 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
 
 public class BinaryTreeMaze : MonoBehaviour
 {
-    public int width = 10;
-    public int height = 10;
-    public GameObject wallPrefab;
-    public GameObject passagePrefab;
+    [SerializeField]
+    private GameObject pillarPrefab;
+    [SerializeField]
+    private MazeCell cellPrefab;
+    [SerializeField]
+    private int mazeWidth;
+    [SerializeField]
+    private int mazeHeight;
 
-    private GameObject[,] cells;
+    private MazeCell[,] mazeGrid;
 
     void Start()
     {
-        GenerateMaze();
-    }
+        mazeGrid = new MazeCell[mazeWidth, mazeHeight];
 
-    void GenerateMaze()
-    {
-        cells = new GameObject[width, height];
-
-        // Create the cells
-        for (int x = 0; x < width; x++)
+        // Instantiate the cells
+        for (int i = 0; i < mazeWidth; i++)
         {
-            for (int z = 0; z < height; z++)
+            for (int j = 0; j < mazeHeight; j++)
             {
-                cells[x, z] = Instantiate(wallPrefab, new Vector3(x, 0, z), Quaternion.identity) as GameObject;
+                // Instantiate a cell prefab at the current position in the grid (Adjusted for the cell's size (4, 4, 4))
+                mazeGrid[i, j] = Instantiate(cellPrefab, new Vector3(i*4, 0, j*4), Quaternion.identity);
+                mazeGrid[i, j].name = "MazeCell_" + i + "_" + j;
             }
         }
 
-        // Create the passages (Binary Tree algorithm)
-        for (int x = 0; x < width; x++)
+        // Instantiate the pillars (starting the exact top left corner) + (2 more columns and rows for the pillars so they align with the cell walls)
+        for (int i = 0; i < mazeWidth + 1; i++)
         {
-            for (int z = 0; z < height; z++)
+            for (int j = 0; j < mazeHeight + 1; j++)
             {
-                if (x == width - 1 && z == height - 1)
-                {
-                    continue;
-                }
+                Instantiate(pillarPrefab, new Vector3(i*4-2, 0, j*4-2), Quaternion.identity);
+            }
+        }
 
-                if (x == width - 1)
-                {
-                    Destroy(cells[x, z]);
-                    cells[x, z] = Instantiate(passagePrefab, new Vector3(x, 0, z), Quaternion.identity) as GameObject;
-                    continue;
-                }
+        // Destroy the bottom wall of the first cell (Entrance of the maze)
+        mazeGrid[0, 0].RemoveBottomWall();
 
-                if (z == height - 1)
-                {
-                    Destroy(cells[x, z]);
-                    cells[x, z] = Instantiate(passagePrefab, new Vector3(x, 0, z), Quaternion.identity) as GameObject;
-                    continue;
-                }
+        // Start generating the maze from the top left cell
+        StartCoroutine(GenerateMaze(null, mazeGrid[0, 0]));
+    }
 
-                if (Random.value < 0.5f)
-                {
-                    Destroy(cells[x, z]);
-                    cells[x, z] = Instantiate(passagePrefab, new Vector3(x, 0, z), Quaternion.identity) as GameObject;
-                }
-                else
-                {
-                    Destroy(cells[x, z + 1]);
-                    cells[x, z + 1] = Instantiate(passagePrefab, new Vector3(x, 0, z + 1), Quaternion.identity) as GameObject;
-                }
+    private IEnumerator GenerateMaze(MazeCell lastCell, MazeCell currentCell) {
+
+        currentCell.markAsVisited();
+        DestroyWalls(lastCell, currentCell);
+
+        yield return new WaitForSeconds(0.1f);
+
+        MazeCell nextCell;
+
+        do {
+            nextCell = GetNextCell(currentCell);
+
+            if (nextCell != null) {
+                yield return GenerateMaze(currentCell, nextCell);
+            }
+        } while (nextCell != null);
+
+    }
+
+    private void DestroyWalls(MazeCell lastCell, MazeCell currentCell) {
+        
+        if (lastCell == null) {
+            return;
+        }
+
+        if (lastCell.transform.position.x < currentCell.transform.position.x) {
+            lastCell.RemoveRightWall();
+            currentCell.RemoveLeftWall();
+        }
+
+        if (lastCell.transform.position.x > currentCell.transform.position.x) {
+            lastCell.RemoveLeftWall();
+            currentCell.RemoveRightWall();
+        }
+
+        if (lastCell.transform.position.z < currentCell.transform.position.z) {
+            lastCell.RemoveTopWall();
+            currentCell.RemoveBottomWall();
+        }
+
+        if (lastCell.transform.position.z > currentCell.transform.position.z) {
+            lastCell.RemoveBottomWall();
+            currentCell.RemoveTopWall();
+        }
+    }
+
+    private MazeCell GetNextCell(MazeCell currentCell) {
+        var unvisitedCells = GetUnvistedNeighbouringCells(currentCell);
+
+        return unvisitedCells.OrderBy(x => Random.Range(1,10)).FirstOrDefault();
+    }
+
+    private IEnumerable<MazeCell> GetUnvistedNeighbouringCells(MazeCell currentCell) {
+        int x = (int)currentCell.transform.position.x / 4;
+        int z = (int)currentCell.transform.position.z / 4;
+
+        // Check Right
+        if (x + 1 < mazeWidth) {
+            var cell = mazeGrid[x + 1, z];
+            if (!cell.visited) {
+                yield return cell;
+            }
+        }
+
+        // Check Left
+        if (x - 1 >= 0) {
+            var cell = mazeGrid[x - 1, z];
+            if (!cell.visited) {
+                yield return cell;
+            }
+        }
+
+        // Check Top
+        if (z + 1 < mazeHeight) {
+            var cell = mazeGrid[x, z + 1];
+            if (!cell.visited) {
+                yield return cell;
+            }
+        }
+
+        // Check Bottom
+        if (z - 1 >= 0) {
+            var cell = mazeGrid[x, z - 1];
+            if (!cell.visited) {
+                yield return cell;
             }
         }
     }
