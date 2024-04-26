@@ -13,6 +13,8 @@ public class BinaryTreeMaze : MonoBehaviour
     private int mazeWidth;
     [SerializeField]
     private int mazeHeight;
+    [SerializeField]
+    private float generationDelay;
 
     private MazeCell[,] mazeGrid;
 
@@ -52,7 +54,7 @@ public class BinaryTreeMaze : MonoBehaviour
         currentCell.markAsVisited();
         DestroyWalls(lastCell, currentCell);
 
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSeconds(generationDelay);
 
         MazeCell nextCell;
 
