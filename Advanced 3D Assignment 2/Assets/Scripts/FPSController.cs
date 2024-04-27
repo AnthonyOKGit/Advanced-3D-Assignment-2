@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 
 [RequireComponent(typeof(CharacterController))]
 
@@ -12,6 +14,12 @@ public class FPSController : MonoBehaviour
     public float runningSpeed = 12.0f;
     public float jumpHeight = 8.0f;
     public float gravity = 10.0f;
+
+    public Vector3 spawnPoint;
+    public int health = 3;
+    public TextMeshProUGUI healthText;
+    public int XP = 0;
+    public TextMeshProUGUI XPText;
 
     public float lookSpeed = 2.0f;
     public float lookXLimit = 45.0f;
@@ -29,6 +37,8 @@ public class FPSController : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
+
+        spawnPoint = transform.position;
     }
 
     // Update is called once per frame
@@ -36,6 +46,10 @@ public class FPSController : MonoBehaviour
     {
         Vector3 forward = transform.TransformDirection(Vector3.forward);
         Vector3 right = transform.TransformDirection(Vector3.right);
+
+        // Health and XP
+        healthText.text = "x" + health;
+        XPText.text = ": " + XP;
 
         // Running
         bool isRunning = Input.GetKey(KeyCode.LeftShift);
@@ -80,6 +94,8 @@ public class FPSController : MonoBehaviour
                 {
                     QuestSystem.Instance.CheckItem(hit.collider.gameObject.name);
 
+                    XP += 100;
+
                     Destroy(hit.collider.gameObject);
                 }
             }
@@ -94,6 +110,29 @@ public class FPSController : MonoBehaviour
         {
             Debug.Log("Portal entered");
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        }
+
+        if (other.CompareTag("Enemy"))
+        {
+            health--;
+            // Go back to spawn point
+            characterController.enabled = false;
+            transform.position = spawnPoint;
+            characterController.enabled = true;
+            // If health is 0, restart the level
+            if (health == 0)
+            {
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            }
+        }
+
+        if (other.CompareTag("Death"))
+        {
+            Debug.Log("DeathZone entered");
+            // Go back to spawn point
+            characterController.enabled = false;
+            transform.position = spawnPoint;
+            characterController.enabled = true;
         }
     }
 }
