@@ -1,47 +1,56 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
-using UnityEngine;
-using UnityEngine.UIElements;
-using System.IO;
 
-public class Quest
-{
+public class Quest {
     [XmlArray("Nodes")]
     [XmlArrayItem("Node")]
-    public List<QuestNode> Nodes;
+    public List<Node> Nodes;
+}
 
-    [XmlAttribute("QuestTitle")]
-    public string questTitle;
+public class Node
+{
+    [XmlAttribute("Id")]
+    public int Id;
 
-    [System.NonSerialized]
-    private QuestNode currentNode;
+    [XmlAttribute("Type")]
+    public string Type;
 
-    [System.NonSerialized]
-    private int currentNodeIndex;
+    [XmlAttribute("Text")]
+    public string Text;
 
-    public QuestNode Progress()
-    {
-        if (hasNextNode()) {
-            currentNode = Nodes[currentNodeIndex++];
-            return currentNode;
-        }
-        return null;
-    }
+    [XmlElement("Options")]
+    public Options Options;
 
-    public bool hasNextNode()
-    {
-        return Nodes != null && currentNodeIndex < Nodes.Count;
-    }
+    [XmlElement("ItemsForQuest")]
+    public ItemsForQuest ItemsForQuest;
+}
 
-    public static Quest Load(string fileName)
-    {
-        var serializer = new XmlSerializer(typeof(Quest));
-        var stream = new FileStream(fileName, FileMode.Open);
-        var quest = serializer.Deserialize(stream) as Quest;
-        stream.Close();
+public class Options
+{
+    [XmlElement("Option")]
+    public List<Option> OptionsList;
+}
 
-        return quest;
-    }
-    
+public class Option
+{
+    [XmlAttribute("Text")]
+    public string Text;
+
+    [XmlAttribute("NextNode")]
+    public int NextNode;
+}
+
+public class ItemsForQuest
+{
+    [XmlElement("Item")]
+    public List<Item> Items;
+}
+
+public class Item
+{
+    [XmlAttribute("Name")]
+    public string Name;
+
+    [XmlAttribute("Amount")]
+    public int Amount;
 }

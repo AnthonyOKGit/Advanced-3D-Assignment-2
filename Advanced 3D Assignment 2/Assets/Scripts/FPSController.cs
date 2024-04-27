@@ -77,6 +77,8 @@ public class FPSController : MonoBehaviour
             {
                 if (hit.collider.CompareTag("Item"))
                 {
+                    QuestSystem.Instance.CheckItem(hit.collider.gameObject.name);
+
                     Destroy(hit.collider.gameObject);
                 }
             }

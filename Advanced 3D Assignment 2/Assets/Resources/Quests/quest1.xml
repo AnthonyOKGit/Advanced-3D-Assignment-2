@@ -1,0 +1,35 @@
+<Quest>
+    <Nodes>
+        <Node Id="1" Type="Start" Text="Hi! Can you gather some items from the maze for me? I need them to make a potion.">
+            <Options>
+                <Option Text="Ok, I'll help you." NextNode="2" />
+                <Option Text="No, I'm too busy." NextNode="3" />
+            </Options>
+        </Node>
+
+        <Node Id="2" Type="Action" Text="Great! I need 2 apples, 1 garlic, and 3 tomatoes.">
+            <Options>
+                <Option Text="I'll get them for you." NextNode="4" />
+                <Option Text="I can't help you." NextNode="3" />
+            </Options>
+        </Node>
+
+        <Node Id="3" Type="End" Text="Ok, no problem. Comeback if you change your mind.">
+        </Node>
+
+        <Node Id="4" Type="StartQuest" Text="Thank you! I'll wait here until you gather them all. You should be able to see them highlighted on the map.">
+            <ItemsForQuest>
+                <Item Name="Apple" Amount="2" />
+                <Item Name="Garlic" Amount="1" />
+                <Item Name="Tomato" Amount="3" />
+            </ItemsForQuest>
+        </Node>
+
+        <Node Id="5" Type="EndQuest" Text="Thank you for the items! Step through that portal over there to continue.">
+        </Node>
+
+        <Node Id="6" Type="QuestIsActive" Text="You have not gathered all the items yet. Come back when you have them all">
+        </Node>
+    </Nodes>
+</Quest>
+
