@@ -5,6 +5,8 @@ using System.Xml.Serialization;
 using Unity.PlasticSCM.Editor.WebApi;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 public class QuestSystem : MonoBehaviour
 {
@@ -12,17 +14,18 @@ public class QuestSystem : MonoBehaviour
     public string questFileName = "quest1.xml";
     public GameObject player;
     public GameObject questGiver;
-    public GameObject OptionPrefab;
+    public GameObject OptionPrefab, InventoryItemPrefab;
     public int currentQuestNodeId = 1;
     public Quest currentQuest;
-    public List<Item> itemsNeededForQuest = new List<Item>();
-    public bool questPanelActive, gatheredAllItems, questIsComplete = false;
+    public List<GameObject> questItems;
+    public bool questPanelActive, questIsActive, gatheredAllItems, questIsComplete = false;
 
     // UI elements
     public GameObject questPanel;
     public GameObject questText;
-    public GameObject optionPanel;
+    public GameObject optionPanel, objectivePanel, inventoryPanel, itemPanel;
     public GameObject defaultOption;
+    public TextMeshProUGUI objectiveText;
 
 
     void Start()
@@ -77,6 +80,7 @@ public class QuestSystem : MonoBehaviour
     void UpdateQuestUI()
     {
         Node currentNode = currentQuest.Nodes.Find(x => x.Id == currentQuestNodeId);
+
         if (currentNode != null)
         {
             questText.GetComponent<TMPro.TextMeshProUGUI>().text = currentNode.Text;
@@ -107,27 +111,88 @@ public class QuestSystem : MonoBehaviour
 
             if (currentNode.Type == "StartQuest")
             {
-                itemsNeededForQuest = currentNode.ItemsForQuest.Items;
+                questIsActive = true;
+                gatheredAllItems = false;
+
+                // For each item in the current node, get the item from resources and instantiate it
+                foreach (Item item in currentNode.ItemsForQuest.Items)
+                {
+                    GameObject itemGO = Resources.Load<GameObject>("Items/" + item.Name);
+                    if (itemGO != null)
+                    {
+                        for (int i = 0; i < item.Amount; i++)
+                        {
+                            GameObject itemInstance = Instantiate(itemGO, new Vector3(-100, 1, -100), Quaternion.identity);
+                            questItems.Add(itemInstance);
+                        }
+                    }
+                }
             }
             else if (currentNode.Type == "EndQuest")
             {
                 questIsComplete = true;
+            }
+            // If the currentNode if of type "End" reset the iD to 1
+            if (currentNode.Type == "End")
+            {
+                currentQuestNodeId = 1;
             }
         }
     }
 
     void Update()
     {
+        // Objective text to display in the UI
+        if (!questIsActive)
+        {
+            objectiveText.text = "Objective: Talk to the quest giver";
+        }
+        else if (questIsActive && !gatheredAllItems)
+        {
+            objectiveText.text = "Objective: Gather all these items:";
+            foreach (GameObject item in questItems)
+            {
+                objectiveText.text += "\n" + item.name;
+                // Remove "(Clone)" from the item name
+                objectiveText.text = objectiveText.text.Replace("(Clone)", "");
+            }
+        }
+        else if (questIsActive && gatheredAllItems && !questIsComplete)
+        {
+            objectiveText.text = "Objective: Return to the quest giver";
+        }
+        else if (questIsComplete)
+        {
+            ClearInventory();
+            objectiveText.text = "Objective: Quest is complete. Continue to the next level";
+        }
+
+        // If Tab key is pressed, show/hide the inventory panel
+        if (Input.GetKeyDown(KeyCode.Tab))
+        {
+            inventoryPanel.SetActive(!inventoryPanel.activeSelf);
+        }
+
         // If questPanel is active let the player use the mouse to interact with the UI
         if (questPanelActive)
         {
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
+
+            objectivePanel.SetActive(false);
         }
         else
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
+
+            objectivePanel.SetActive(true);
+        }
+
+        // If the player has not gathered all items, set the current node to the node of type "QuestIsActive"
+        if (!gatheredAllItems && questIsActive)
+        {
+            SetCurrentNode(currentQuest.Nodes.Find(x => x.Type == "QuestIsActive").Id);
         }
         
         // Check if player presses the "E" key to interact with the quest giver
@@ -136,6 +201,12 @@ public class QuestSystem : MonoBehaviour
             float distance = Vector3.Distance(player.transform.position, questGiver.transform.position);
             if (distance < 3)
             {
+                // If the player has gathered all items, and they talk to the quest giver, set the current node to the node of type "EndQuest"
+                if (gatheredAllItems && questIsActive)
+                {
+                    SetCurrentNode(currentQuest.Nodes.Find(x => x.Type == "EndQuest").Id);
+                }
+
                 questPanelActive = true;
 
                 questPanel.SetActive(true);
@@ -146,28 +217,57 @@ public class QuestSystem : MonoBehaviour
         // If questPanel is active, check if player presses the "Q" key to close the quest panel
         if (questPanel.activeSelf && Input.GetKeyDown(KeyCode.Q))
         {
+            questPanelActive = false;
+
             questPanel.SetActive(false);
         }
+
     }
 
     public void CheckItem(string itemName)
     {
-        Item item = itemsNeededForQuest.Find(x => x.Name == itemName);
-        if (item != null)
+        if (questIsActive)
         {
-            item.Amount--;
-            if (item.Amount <= 0)
+            GameObject item = questItems.Find(x => x.name == itemName);
+            if (item != null)
             {
-                itemsNeededForQuest.Remove(item);
-            }
-        }
+                bool itemExists = false;
 
-        if (itemsNeededForQuest.Count == 0)
-        {
-            gatheredAllItems = true;
+                string itemNameWithoutClone = itemName.Replace("(Clone)", "");
+
+                // Add the item to the inventory panel, if it already exists, increase the amount
+                foreach (Transform child in itemPanel.transform)
+                {
+                    if (child.GetComponent<InventoryItem>().itemName == itemNameWithoutClone && !itemExists)
+                    {
+                        child.GetComponent<InventoryItem>().AddAmount(1);
+                        itemExists = true;
+                    }
+                }
+
+                if (!itemExists)
+                {
+                    GameObject inventoryItem = Instantiate(InventoryItemPrefab, itemPanel.transform);
+                    inventoryItem.GetComponent<InventoryItem>().SetItem(itemNameWithoutClone, 1);
+                }
+
+                questItems.Remove(item);
+                Destroy(item);
+
+                if (questItems.Count == 0)
+                {
+                    gatheredAllItems = true;
+                }
+            }
         }
     }
 
-
+    public void ClearInventory()
+    {
+        foreach (Transform child in itemPanel.transform)
+        {
+            Destroy(child.gameObject);
+        }
+    }
     
 }

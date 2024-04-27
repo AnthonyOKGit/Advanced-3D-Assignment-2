@@ -18,6 +18,13 @@ public class BinaryTreeMaze : MonoBehaviour
 
     private MazeCell[,] mazeGrid;
 
+    [SerializeField]
+    private GameObject applePrefab;
+    [SerializeField]
+    private GameObject garlicPrefab;
+    [SerializeField]
+    private GameObject tomatoPrefab;
+
     void Start()
     {
         mazeGrid = new MazeCell[mazeWidth, mazeHeight];
@@ -47,6 +54,16 @@ public class BinaryTreeMaze : MonoBehaviour
 
         // Start generating the maze from the top left cell
         StartCoroutine(GenerateMaze(null, mazeGrid[0, 0]));
+
+        // Instantiate 2 apples, 1 garlics and 3 tomatoes at random positions in the maze
+        Instantiate(applePrefab, new Vector3(Random.Range(0, mazeWidth) * 4, 1, Random.Range(0, mazeHeight) * 4), Quaternion.identity);
+        Instantiate(applePrefab, new Vector3(Random.Range(0, mazeWidth) * 4, 1, Random.Range(0, mazeHeight) * 4), Quaternion.identity);
+
+        Instantiate(garlicPrefab, new Vector3(Random.Range(0, mazeWidth) * 4, 1, Random.Range(0, mazeHeight) * 4), Quaternion.identity);
+
+        Instantiate(tomatoPrefab, new Vector3(Random.Range(0, mazeWidth) * 4, 1, Random.Range(0, mazeHeight) * 4), Quaternion.identity);
+        Instantiate(tomatoPrefab, new Vector3(Random.Range(0, mazeWidth) * 4, 1, Random.Range(0, mazeHeight) * 4), Quaternion.identity);
+        Instantiate(tomatoPrefab, new Vector3(Random.Range(0, mazeWidth) * 4, 1, Random.Range(0, mazeHeight) * 4), Quaternion.identity);
     }
 
     private IEnumerator GenerateMaze(MazeCell lastCell, MazeCell currentCell) {

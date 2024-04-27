@@ -70,7 +70,7 @@ public class FPSController : MonoBehaviour
         }
 
         // Item pickup
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) && QuestSystem.Instance.questIsActive)
         {
             RaycastHit hit;
             if (Physics.Raycast(playerCamera.transform.position, playerCamera.transform.forward, out hit, 3))
