@@ -14,7 +14,7 @@ public class QuestSystem : MonoBehaviour
     public string questFileName = "quest1.xml";
     public GameObject player;
     public GameObject questGiver;
-    public GameObject OptionPrefab, InventoryItemPrefab;
+    public GameObject OptionPrefab, InventoryItemPrefab, Portal;
     public int currentQuestNodeId = 1;
     public Quest currentQuest;
     public List<GameObject> questItems;
@@ -131,6 +131,7 @@ public class QuestSystem : MonoBehaviour
             else if (currentNode.Type == "EndQuest")
             {
                 questIsComplete = true;
+                Portal.SetActive(true);
             }
             // If the currentNode if of type "End" reset the iD to 1
             if (currentNode.Type == "End")

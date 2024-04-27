@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterController))]
 
@@ -84,5 +85,15 @@ public class FPSController : MonoBehaviour
             }
         }
 
+    }
+
+    // OnTriggerEnter with "Portal" tag go to the next level
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Portal"))
+        {
+            Debug.Log("Portal entered");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
+        }
     }
 }
