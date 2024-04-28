@@ -1,0 +1,54 @@
+<Quest>
+    <Nodes>
+        <Node Id="1" Type="Start" Text="Hi again!">
+            <Options>
+                <Option Text="How are you?" NextNode="2" />
+            </Options>
+        </Node>
+        <Node Id="2" Type="Action" Text="I'm fine, thank you! I could use your help again, if thats ok?">
+            <Options>
+                <Option Text="Sure, what do you need?" NextNode="3" />
+                <Option Text="I'm busy right now, sorry." NextNode="4" />
+            </Options>
+        </Node>
+        <Node Id="3" Type="Action" Text="Great! I need you fetch me some more items, they are guarded by some ghosts across the bridge there.">
+            <Options>
+                <Option Text="I'll do it!" NextNode="5" />
+                <Option Text="Ghosts? Like you?." NextNode="6" />
+                <Option Text="Whats that glowing coffee over on the table?" NextNode="9" />
+                <Option Text="I'm not sure, I'll think about it." NextNode="4" />
+            </Options>
+        </Node>
+        <Node Id="4" Type="End" Text="Ok, no problem. Comeback if you change your mind.">
+        </Node>
+        <Node Id="5" Type="StartQuest" Text="Thank you! I'll wait here until you gather them all. You should be able to see them highlighted on the map.">
+            <ItemsForQuest>
+                <Item Name="Fish" Amount="1" />
+                <Item Name="Pumpkin" Amount="1" />
+                <Item Name="Mushroom" Amount="1" />
+            </ItemsForQuest>
+        </Node>
+        <Node Id="6" Type="Action" Text="No, not like me. They are evil and will try to hurt you. They will also get more angry if you take there items...">
+            <Options>
+                <Option Text="I'll be careful." NextNode="5" />
+                <Option Text="I'm not sure, I'll think about it." NextNode="4" />
+            </Options>
+        </Node>
+        <Node Id="7" Type="EndQuest" Text="Thank you for the items! Step through that portal over there to continue.">
+        </Node>
+        <Node Id="8" Type="QuestIsActive" Text="You have not gathered all the items yet. Come back when you have them all">
+        </Node>
+        <Node Id="9" Type="Action" Text="Oh, that's my special potion coffee! It gives you more health and speed!">
+            <Options>
+                <Option Text="Can I have some?" NextNode="10" />
+                <Option Text="I'm not sure, I'll think about it." NextNode="4" />
+            </Options>
+        </Node>
+        <Node Id="10" Type="Action" Text="If you help me with the items, I'll give you some!">
+            <Options>
+                <Option Text="Ok, I'll help you." NextNode="5" />
+                <Option Text="I'm not sure, I'll think about it." NextNode="4" />
+            </Options>
+        </Node>
+    </Nodes>
+</Quest>

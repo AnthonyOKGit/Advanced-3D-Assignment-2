@@ -98,7 +98,16 @@ public class FPSController : MonoBehaviour
 
                     Destroy(hit.collider.gameObject);
                 }
+
+                if (hit.collider.CompareTag("Potion"))
+                {
+                    health++;
+                    // Gain some speed
+                    playerSpeed += 2.0f;
+                    Destroy(hit.collider.gameObject);
+                }
             }
+            
         }
 
     }
@@ -118,6 +127,8 @@ public class FPSController : MonoBehaviour
             // Go back to spawn point
             characterController.enabled = false;
             transform.position = spawnPoint;
+            // Destroy the enemy
+            Destroy(other.gameObject);
             characterController.enabled = true;
             // If health is 0, restart the level
             if (health == 0)

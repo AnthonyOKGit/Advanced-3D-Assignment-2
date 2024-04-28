@@ -8,6 +8,7 @@ TagManager:
   - Portal
   - Enemy
   - Death
+  - Potion
   layers:
   - Default
   - TransparentFX
