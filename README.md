@@ -6,6 +6,8 @@
 ### Student ID: 20093999
 
 ## Github Repository: https://github.com/GuyGoose/Advanced-3D-Assignment-2
+## Demo Video: https://youtu.be/s4RTGLketrc
+## Itch Page: https://antist.itch.io/potion-ghost
 
 ## Features Implemented:
  
