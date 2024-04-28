@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Quest>
     <Nodes>
         <Node Id="1" Type="Start" Text="Hi! Can you gather some items from the maze for me? I need them to make a potion.">
